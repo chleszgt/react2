@@ -60,6 +60,10 @@
         background-color: transparent;
         border-bottom: 1px solid #fff;
       }
+      aside > button.active{
+        color: #000;
+        background-color: #fff;
+      }
       /* SECTION */
       section{
         float: right;
@@ -103,7 +107,8 @@
         constructor(props){
           super(props);
           this.state = {
-            filter: 'all',
+            current: 'all',
+            filters: ['all','css','javascript','svg','fun'],
             pens: [
                 {
                     id: 'XNEdRe',
@@ -176,29 +181,43 @@
           this.handleChange = this.handleChange.bind(this);
         }
         handleChange(value){
-          this.setState({filter: value});
+          this.setState({current: value});
         }
         render(){
-          var list = [];
-          for(var i = 0; i < this.state.pens.length; i++){
-            var isActive = this.state.pens[i].type === this.state.filter || this.state.filter === 'all';
-            list.push( <Item key={i} active={isActive} id={this.state.pens[i].id} slug={this.state.pens[i].slug} /> );
-          }
+          var buttons, pens, that = this;
+          
+          buttons = this.state.filters.map(function(x,index){
+            var isActive = x === that.state.current;
+            return <Button key={index} active={isActive} onClick={() => that.handleChange(x)} term={x} />
+          });
+
+          pens = this.state.pens.map(function(y,index){
+            var isActive = y.type === that.state.current || that.state.current === 'all';
+            return <Item key={index} active={isActive} id={y.id} slug={y.slug} />;
+          });
+          
           return(
             <div>
               <aside>
                 <h1 dangerouslySetInnerHTML={{__html: this.props.title}}></h1>
-                <button onClick={() => this.handleChange('all')}>ALL</button>
-                <button onClick={() => this.handleChange('utils')}>UTILS</button>
-                <button onClick={() => this.handleChange('css')}>CSS</button>
-                <button onClick={() => this.handleChange('javascript')}>JAVASCRIPT</button>
-                <button onClick={() => this.handleChange('svg')}>SVG</button>
-                <button onClick={() => this.handleChange('fun')}>FUN</button>
+                {buttons}
               </aside>
               <section id="list">
-                {list}
+                {pens}
               </section>
             </div>
+          )
+        }
+      }
+
+      class Button extends React.Component{
+        render(){
+          var className = '';
+          if( this.props.active ){
+            className += 'active';
+          }
+          return(
+            <button onClick={this.props.onClick} className={className}>{this.props.term}</button>
           )
         }
       }
